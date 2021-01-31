@@ -3,7 +3,7 @@ var bcrypt = require('bcrypt');
 
 var Schema = mongoose.Schema;
 
-var UserSchema = mongoose.Schema({
+var WalletSchema = mongoose.Schema({
     address: {
         type: String,
         require: [true, 'ID Required']
@@ -20,7 +20,7 @@ var UserSchema = mongoose.Schema({
     }
 });
 
-UserSchema.pre('save', function(next) {
+WalletSchema.pre('save', function(next) {
     var user = this;
 
     if(!user.isModified('wallet_key')) return next();
@@ -31,15 +31,15 @@ UserSchema.pre('save', function(next) {
         bcrypt.hash(user.wallet_key, salt, function(err, hash) {
             if (err) return next(err);
 
-            user.password = hash;
+            user.wallet_key = hash;
             next();
         });
     });
 });
 
-UserSchema.methods.comparePassword = function(candidatePassword, cb) {
+UserSchema.methods.compareKey = function(candidateKey, cb) {
     return new Promise((resolve, reject) => {
-        bcrypt.compare(candidatePassword, this.password, function(error, isMatch) {
+        bcrypt.compare(candidateKey, this.wallet_key, function(error, isMatch) {
             if (error) {
                 reject(error)
             } else {
@@ -49,4 +49,4 @@ UserSchema.methods.comparePassword = function(candidatePassword, cb) {
     })
 };
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('Wallet', UserSchema);
